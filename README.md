@@ -37,8 +37,8 @@ This n8n workflow automates the process of fetching, classifying, formatting, em
 
 ## 💡 Example Email Output
 
-```html
-🧠 آخر أخبار الذكاء الاصطناعي  ![Capture44wws](https://github.com/user-attachments/assets/721f0d37-8f16-42d1-9910-74c3acc83c6e)
 
 
-📎 Includes article image  
+![Capture44wws](https://github.com/user-attachments/assets/812c2c3b-f825-4ee3-a4ad-f9f0cad0fbbb)
+
+
