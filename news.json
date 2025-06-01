@@ -1,0 +1,358 @@
+{
+  "name": "news",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 13
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        20,
+        140
+      ],
+      "id": "2355be05-6aa6-4b5c-8cb8-1d77f9a7184a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything?q=artificial+intelligence&language=en&sortBy=publishedAt&pageSize=5&apiKey=d6b8f9758a5644ff9287b809e0431758",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        180,
+        160
+      ],
+      "id": "3306bb38-42cd-4486-88d6-335b32859010",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=صنّف الأخبار التالية حسب فئتها (اقتصادي، تقني، قانوني، أخلاقي، تعليمي...):\n\n{{$node[\"Code\"].json.plainTextArray.join(\"\\n\\n\")}}\n\n\n\n\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        880,
+        260
+      ],
+      "id": "36152b56-756f-4b92-908b-f9c81b2dfc16",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "LcoSO1qsL6Settl5",
+          "name": "OpenAi account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "abrarshamasat799@gmail.com",
+        "subject": "AI NEWS",
+        "message": "={{$node[\"Code\"].json[\"html\"]}}\n\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1220,
+        260
+      ],
+      "id": "107faf46-7a7d-4c89-8fb7-57585fc70903",
+      "name": "Gmail",
+      "webhookId": "598cff28-37a2-4a2b-9fbd-9cc4b2401778",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xRcJFlc9Z2V929vI",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      html: `\n        <h2 style=\"color:#2E86C1;\">🧠 آخر أخبار الذكاء الاصطناعي</h2>\n        <ul style=\"padding-left: 0;\">\n          ${$json.articles.map(article => `\n            <li style=\"margin-bottom: 20px; list-style: none; border-bottom: 1px solid #ddd; padding-bottom: 10px;\">\n              <h3 style=\"margin: 0;\">\n                <a href=\"${article.url}\" target=\"_blank\" style=\"color:#1A5276; text-decoration:none;\">${article.title}</a>\n              </h3>\n              <p style=\"margin: 5px 0;\">${article.description}</p>\n              ${article.image ? `<img src=\"${article.image}\" style=\"max-width:100%; max-height:200px; border-radius:8px;\" />` : ''}\n              <p style=\"color:gray; font-size:12px;\">${new Date(article.publishedAt).toLocaleString()}</p>\n            </li>\n          `).join('')}\n        </ul>\n        <img src=\"https://images.pexels.com/photos/6153354/pexels-photo-6153354.jpeg\" alt=\"AI\" style=\"max-width:600px; margin-top:20px;\"/>\n        <p>تحياتي،<br>نظام التنبيهات</p>\n      `\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        60
+      ],
+      "id": "0b5c2a5d-a90a-4826-b77e-a70b6973ae41",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      articles: $json.articles.map(article => ({\n        title: article.title || 'عنوان غير متوفر',\n        description: article.description || 'لا يوجد وصف',\n        url: article.url || '#',\n        image: article.urlToImage || '',\n        publishedAt: article.publishedAt || ''\n      }))\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        60
+      ],
+      "id": "9b3be624-27e8-4b0e-b235-0ce360f8e3fd",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b739b501-0d09-448a-9edd-21689ba7d615",
+              "leftValue": "={{$json[\"totalResults\"]}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        360,
+        160
+      ],
+      "id": "f33a790d-1a7d-4525-9931-c32ae15c6c46",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1hT4_ff7yRBQeuk0xhauoPmAb3Zvc5DFSqDxloKfImsc/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1hT4_ff7yRBQeuk0xhauoPmAb3Zvc5DFSqDxloKfImsc/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{$json[\"title\"]}}",
+            "Description": "={{$json[\"description\"]}}",
+            "URL": "={{$json[\"url\"]}}",
+            "PublishedAt": "= {{$json[\"publishedAt\"]}}"
+          },
+          "matchingColumns": [
+            "Title"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PublishedAt",
+              "displayName": "PublishedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "labelIds",
+              "displayName": "labelIds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1400,
+        260
+      ],
+      "id": "fce5e900-ee40-48a8-86cb-6d784099ff8c",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PTSmnQXkzpqUzVPV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2be412e0-f302-48b1-8c75-9b4ea3c221ab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3dfc1280a79831d4234af7e6cc08f9877ebfb9b654891eea42f918f0063ec33"
+  },
+  "id": "pV5yF5O1yv0pP7Vf",
+  "tags": []
+}
